@@ -26,9 +26,13 @@ func (t Telegram) Parse() (map[string][]string, error) {
 
 	lines := strings.Split(string(t), "\r\n")
 
+	if len(lines) < 2 {
+		return nil, erros.New("Parse error: unexpected number of lines in telegram.")
+	}
+
 	// Some additional checks
 	if lines[0][0] != '/' {
-		return nil, errors.New("Expected '/' missing in first line of telegram")
+		return nil, errors.New("Expected '/' missing in first line of telegram.")
 	}
 	if len(lines[1]) != 0 {
 		return nil, errors.New("Missing separating new line (CR+LF) between identifier and data in telegram.")
