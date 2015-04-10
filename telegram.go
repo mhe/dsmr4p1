@@ -27,7 +27,7 @@ func (t Telegram) Parse() (map[string][]string, error) {
 	lines := strings.Split(string(t), "\r\n")
 
 	if len(lines) < 2 {
-		return nil, erros.New("Parse error: unexpected number of lines in telegram.")
+		return nil, errors.New("Parse error: unexpected number of lines in telegram.")
 	}
 
 	// Some additional checks
