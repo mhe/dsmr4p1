@@ -51,8 +51,13 @@ func ParseTimestamp(timestamp string) (time.Time, error) {
 		return time.Time{}, errors.New("Error parsing timestamp: missing DST indicator")
 	}
 
+	// To make sure parsing is always consistent and indepentent of the
+	// the local timezone of the host this code is running on, let's for now
+	// assume Dutch time.
+	loc, err := time.LoadLocation("Europe/Amsterdam")
+
 	timestamp = timestamp[:len(timestamp)-1] + " " + timezone
-	ts, err := time.Parse("060102150405 MST", timestamp)
+	ts, err := time.ParseInLocation("060102150405 MST", timestamp, loc)
 	if err != nil {
 		return ts, err
 	}
