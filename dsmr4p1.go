@@ -70,7 +70,7 @@ func startPolling(input io.Reader, ch chan Telegram) {
 	br := bufio.NewReader(input)
 	for {
 		// Read until we find a '/', which should be the beginning of the telegram.
-		_, err := br.ReadBytes(byte('/'))
+		_, err := br.ReadBytes('/')
 		if err == io.EOF {
 			break
 		} else if err != nil {
@@ -86,14 +86,14 @@ func startPolling(input io.Reader, ch chan Telegram) {
 		}
 
 		// The '!' character signals the end of the telegram.
-		data, err := br.ReadBytes(byte('!'))
+		data, err := br.ReadBytes('!')
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 		// The four hexadecimal characters are the CRC-16 of the preceding data, delimitted by
 		// a carriage return.
-		crcBytes, err := br.ReadBytes(byte('\n'))
+		crcBytes, err := br.ReadBytes('\n')
 		if err != nil {
 			log.Println(err)
 			continue
