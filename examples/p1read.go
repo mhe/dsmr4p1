@@ -8,11 +8,13 @@ import (
 	"github.com/tarm/serial"
 	"log"
 	"os"
+	"time"
 
 	"io"
 )
 
 var testfile = flag.String("testfile", "", "Testfile to use instead of serial port")
+var ratelimit = flag.Int("ratelimit", 0, "When using a testfile as input, rate-limit the release of P1 telegrams to once every n seconds.")
 var device = flag.String("device", "/dev/ttyUSB0", "Serial port device to use")
 var baudrate = flag.Int("baud", 115200, "Baud rate to use")
 
@@ -34,6 +36,9 @@ func main() {
 		input, err = os.Open(*testfile)
 		if err != nil {
 			log.Fatal(err)
+		}
+		if *ratelimit > 0 {
+			input = dsmr4p1.RateLimit(input, time.Duration(*ratelimit)*time.Second)
 		}
 	}
 	ch := dsmr4p1.Poll(input)

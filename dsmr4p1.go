@@ -2,6 +2,7 @@ package dsmr4p1
 
 import (
 	"bufio"
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -123,4 +124,52 @@ func Poll(input io.Reader) chan Telegram {
 	ch := make(chan Telegram)
 	go startPolling(input, ch)
 	return ch
+}
+
+// Some code to simulate a smartmeter
+type delayedReader struct {
+	rd     *bufio.Reader
+	delim  byte
+	ticker *time.Ticker
+}
+
+func (dr *delayedReader) Read(p []byte) (n int, err error) {
+	tmp, _ := dr.rd.Peek(len(p))
+	i1 := bytes.IndexByte(tmp, dr.delim)
+	// No start of telegram here, just continue reading
+	if i1 == -1 {
+		n, err = dr.rd.Read(p)
+		return
+	}
+	// So there is a '/' coming up. If the '/' is not the first charactar, simply let read
+	// until it is.
+	if i1 != 0 {
+		n, err = dr.rd.Read(p[:i1])
+		return
+	}
+
+	// i1 == 0, so tmp[0] == '/': a new telegram is coming up. Let's wait until the ticker fires.
+	<-dr.ticker.C
+
+	// Ok, but how much should we return? Is there maybe another '/'?
+	i2 := bytes.IndexByte(tmp[i1+1:], dr.delim)
+
+	// If there isn't, just read the rest.
+	if i2 == -1 {
+		n, err = dr.rd.Read(p)
+		return
+	}
+
+	// Finally, if there is another '/' coming up, read until that character.
+	n, err = dr.rd.Read(p[:i2])
+	return
+}
+
+// Take a io.Reader (typically the output of a os.Open) and delay the output of each Telegram
+// (delimited by a '/') at a certain rate (delay). The main purpose is for testing/simulation. Simply
+// save the  output of an actual smartmeter to a file. Then in your test program open the file and
+// use the resulting io.Reader with this function. The resulting io.Reader will mimick a real smart-meter
+// that outputs a telegram every n seconds (typically 10).
+func RateLimit(input io.Reader, delay time.Duration) io.Reader {
+	return &delayedReader{rd: bufio.NewReader(input), delim: '/', ticker: time.NewTicker(delay)}
 }
