@@ -35,6 +35,11 @@ const (
 	winterTimezone = "CET"
 )
 
+var (
+	// ErrorParseTimestamp indicates that there was an error parsing a timestamp.
+	ErrorParseTimestamp = errors.New("Error parsing timestamp: missing DST indicator.")
+)
+
 // ParseTimestamp parses the timestamp format used in the dutch smartmeters. Do note this function
 // assumes the CET/CEST timezone.
 func ParseTimestamp(timestamp string) (time.Time, error) {
@@ -50,7 +55,7 @@ func ParseTimestamp(timestamp string) (time.Time, error) {
 	case 'W':
 		timezone = winterTimezone
 	default:
-		return time.Time{}, errors.New("Error parsing timestamp: missing DST indicator")
+		return time.Time{}, ErrorParseTimestamp
 	}
 
 	// To make sure parsing is always consistent and indepentent of the
