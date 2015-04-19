@@ -6,10 +6,10 @@ import (
 	"strings"
 )
 
-// Type for a P1 telegram. It is essentially a slice of bytes.
+// Telegram holds the a P1 telegram. It is essentially a slice of bytes.
 type Telegram []byte
 
-// Return the identifier in the telegram
+// Identifier returns the identifier in the telegram.
 func (t Telegram) Identifier() string {
 	// According to the documentation, the telegram starts with:
 	// "/XXXZ Ident CR LF CR LF", followed by the data.
@@ -17,9 +17,9 @@ func (t Telegram) Identifier() string {
 	return string(t[5:i])
 }
 
-// Attempt to parse the telegram. Return a map of strings to string slices. The keys
-// in the map are the ID-codes, the strings in the slice are the value between brackets
-// for that ID-code.
+// Parse attempts to parse the telegram. It returns a map of strings to string
+// slices. The keys in the map are the ID-codes, the strings in the slice are
+// are the value between brackets for that ID-code.
 func (t Telegram) Parse() (map[string][]string, error) {
 	// Parse the telegram in a relatively naive way. Of course this
 	// is not properly langsec approved :)
