@@ -1,4 +1,4 @@
-// Go library for reading (and parsing) data from the P1 port of dutch smart meters.
+// Package dsmr4p1 is a library for reading (and parsing) data from the P1 port of dutch smart meters.
 package dsmr4p1
 
 import (
@@ -35,7 +35,7 @@ const (
 	winterTimezone = "CET"
 )
 
-// Parse the timestamp format used in the dutch smartmeters. Do note this function
+// ParseTimestamp parses the timestamp format used in the dutch smartmeters. Do note this function
 // assumes the CET/CEST timezone.
 func ParseTimestamp(timestamp string) (time.Time, error) {
 	// The format for the timestamp is:
@@ -118,9 +118,9 @@ func startPolling(input io.Reader, ch chan Telegram) {
 	close(ch)
 }
 
-// Start polling the P1 port. This function will start a goroutine and received telegrams are
-// put into returned channel. Only telegrams whose CRC value are correct are put into
-// the channel.
+// Poll starts polling the P1 port represented by input (an io.Reader). It will start a
+// goroutine and received telegrams are put into returned channel. Only telegrams whose
+// CRC value are correct are put into the channel.
 func Poll(input io.Reader) chan Telegram {
 	ch := make(chan Telegram)
 	go startPolling(input, ch)
@@ -166,7 +166,7 @@ func (dr *delayedReader) Read(p []byte) (n int, err error) {
 	return
 }
 
-// Take a io.Reader (typically the output of a os.Open) and delay the output of each Telegram
+// RateLimit takes a io.Reader (typically the output of a os.Open) and delay the output of each Telegram
 // (delimited by a '/') at a certain rate (delay). The main purpose is for testing/simulation. Simply
 // save the  output of an actual smartmeter to a file. Then in your test program open the file and
 // use the resulting io.Reader with this function. The resulting io.Reader will mimick a real smart-meter
