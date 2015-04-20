@@ -40,8 +40,8 @@ var (
 	ErrorParseTimestamp = errors.New("Error parsing timestamp: missing DST indicator.")
 )
 
-// ParseTimestamp parses the timestamp format used in the dutch smartmeters. Do note this function
-// assumes the CET/CEST timezone.
+// ParseTimestamp parses the timestamp format used in the dutch smartmeters. Do
+// note this function assumes the CET/CEST timezone.
 func ParseTimestamp(timestamp string) (time.Time, error) {
 	// The format for the timestamp is:
 	// YYMMDDhhmmssX
@@ -58,9 +58,9 @@ func ParseTimestamp(timestamp string) (time.Time, error) {
 		return time.Time{}, ErrorParseTimestamp
 	}
 
-	// To make sure parsing is always consistent and indepentent of the
-	// the local timezone of the host this code is running on, let's for now
-	// assume Dutch time.
+	// To make sure parsing is always consistent and indepentent of the the local
+	// timezone of the host this code is running on, let's for now assume Dutch
+	// time.
 	loc, err := time.LoadLocation("Europe/Amsterdam")
 
 	timestamp = timestamp[:len(timestamp)-1] + " " + timezone
@@ -123,9 +123,9 @@ func startPolling(input io.Reader, ch chan Telegram) {
 	close(ch)
 }
 
-// Poll starts polling the P1 port represented by input (an io.Reader). It will start a
-// goroutine and received telegrams are put into returned channel. Only telegrams whose
-// CRC value are correct are put into the channel.
+// Poll starts polling the P1 port represented by input (an io.Reader). It will
+// start a goroutine and received telegrams are put into returned channel. Only
+// telegrams whose CRC value are correct are put into the channel.
 func Poll(input io.Reader) chan Telegram {
 	ch := make(chan Telegram)
 	go startPolling(input, ch)
@@ -147,14 +147,15 @@ func (dr *delayedReader) Read(p []byte) (n int, err error) {
 		n, err = dr.rd.Read(p)
 		return
 	}
-	// So there is a '/' coming up. If the '/' is not the first charactar, simply let read
-	// until it is.
+	// So there is a '/' coming up. If the '/' is not the first charactar, simply
+	// let read until it is.
 	if i1 != 0 {
 		n, err = dr.rd.Read(p[:i1])
 		return
 	}
 
-	// i1 == 0, so tmp[0] == '/': a new telegram is coming up. Let's wait until the ticker fires.
+	// i1 == 0, so tmp[0] == '/': a new telegram is coming up. Let's wait until
+	// the ticker fires.
 	<-dr.ticker.C
 
 	// Ok, but how much should we return? Is there maybe another '/'?
@@ -171,11 +172,12 @@ func (dr *delayedReader) Read(p []byte) (n int, err error) {
 	return
 }
 
-// RateLimit takes a io.Reader (typically the output of a os.Open) and delay the output of each Telegram
-// (delimited by a '/') at a certain rate (delay). The main purpose is for testing/simulation. Simply
-// save the  output of an actual smartmeter to a file. Then in your test program open the file and
-// use the resulting io.Reader with this function. The resulting io.Reader will mimick a real smart-meter
-// that outputs a telegram every n seconds (typically 10).
+// RateLimit takes a io.Reader (typically the output of a os.Open) and delay the
+// output of each Telegram (delimited by a '/') at a certain rate (delay). The
+// main purpose is for testing/simulation. Simply save the output of an actual
+// smartmeter to a file. Then in your test program open the file and use the
+// resulting io.Reader with this function. The resulting io.Reader will mimick a
+// real smart-meter that outputs a telegram every n seconds (typically 10).
 func RateLimit(input io.Reader, delay time.Duration) io.Reader {
 	return &delayedReader{rd: bufio.NewReader(input), delim: '/', ticker: time.NewTicker(delay)}
 }

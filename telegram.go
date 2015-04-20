@@ -39,9 +39,10 @@ func (t Telegram) Parse() (map[string][]string, error) {
 	}
 
 	result := make(map[string][]string)
-	// Iterate over the lines and try to parse the data. The first two lines can be skipped because
-	// they should contain the identifier (see Identifier()) and a new-line.
-	// The last line is skipped because it should only contain an exclamation mark.
+	// Iterate over the lines and try to parse the data. The first two lines can
+	// be skipped because they should contain the identifier (see Identifier())
+	// and a new-line.  The last line is skipped because it should only contain an
+	// exclamation mark.
 	for i, l := range lines[2 : len(lines)-1] {
 		idCodeEnd := strings.Index(l, "(")
 		if idCodeEnd == -1 {
