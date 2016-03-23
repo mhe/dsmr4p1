@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/howeyc/crc16"
@@ -38,6 +40,9 @@ const (
 var (
 	// ErrorParseTimestamp indicates that there was an error parsing a timestamp.
 	ErrorParseTimestamp = errors.New("Error parsing timestamp: missing DST indicator.")
+	// ErrorParseValue indicates that there was an error parsing a value string
+	// (i.e., a string containing both a value and a unit)
+	ErrorParseValueWithUnit = errors.New("Error parsing string that should contain both a value and a unit.")
 )
 
 // ParseTimestamp parses the timestamp format used in the dutch smartmeters. Do
@@ -69,6 +74,27 @@ func ParseTimestamp(timestamp string) (time.Time, error) {
 		return ts, err
 	}
 	return ts, nil
+}
+
+// ParseValueWithUnit parses the provided string into a float and a unit. If the
+// unit starts with "k" the value is multiplied by 1000 and the "k" is removed
+// from the unit.
+func ParseValueWithUnit(input string) (value float64, unit string, err error) {
+	parts := strings.Split(input, "*")
+	if len(parts) != 2 {
+		err = ErrorParseValueWithUnit
+		return
+	}
+	value, err = strconv.ParseFloat(parts[0], 64)
+	if err != nil {
+		return
+	}
+	unit = parts[1]
+	if strings.HasPrefix(unit, "k") {
+		value *= 1000
+		unit = unit[1:]
+	}
+	return
 }
 
 // Starts polling and attempts to parse a telegram.
