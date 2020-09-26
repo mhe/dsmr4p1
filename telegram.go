@@ -3,6 +3,7 @@ package dsmr4p1
 import (
 	"bytes"
 	"errors"
+	"strconv"
 	"strings"
 )
 
@@ -27,15 +28,15 @@ func (t Telegram) Parse() (map[string][]string, error) {
 	lines := strings.Split(string(t), "\r\n")
 
 	if len(lines) < 2 {
-		return nil, errors.New("Parse error: unexpected number of lines in telegram.")
+		return nil, errors.New("parse error: unexpected number of lines in telegram")
 	}
 
 	// Some additional checks
 	if lines[0][0] != '/' {
-		return nil, errors.New("Expected '/' missing in first line of telegram.")
+		return nil, errors.New("expected '/' missing in first line of telegram")
 	}
 	if len(lines[1]) != 0 {
-		return nil, errors.New("Missing separating new line (CR+LF) between identifier and data in telegram.")
+		return nil, errors.New("missing separating new line (CR+LF) between identifier and data in telegram")
 	}
 
 	result := make(map[string][]string)
@@ -46,7 +47,7 @@ func (t Telegram) Parse() (map[string][]string, error) {
 	for i, l := range lines[2 : len(lines)-1] {
 		idCodeEnd := strings.Index(l, "(")
 		if idCodeEnd == -1 {
-			return nil, errors.New("Expected '(', not found on line" + string(i))
+			return nil, errors.New("Expected '(', not found on line" + strconv.Itoa(i))
 		}
 
 		idCode := l[:idCodeEnd]
